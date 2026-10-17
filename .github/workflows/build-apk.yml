@@ -1,0 +1,71 @@
+name: Build and Sign APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Buildozer dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
+        pip3 install --upgrade pip setuptools cynthion
+
+    - name: Set Android license acceptance
+      run: echo "ANDROID_ACCEPT_LICENSES=true" >> $GITHUB_ENV
+
+    - name: Install Buildozer
+      run: |
+        pip3 install buildozer
+
+    - name: Check for release signing secrets
+      id: check_secrets
+      run: |
+        if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ] && [ -n "${{ secrets.KEYSTORE_PASSWORD }}" ] && [ -n "${{ secrets.KEY_ALIAS }}" ] && [ -n "${{ secrets.KEY_PASSWORD }}" ]; then
+          echo "has_secrets=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_secrets=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Decode keystore if secrets exist
+      if: steps.check_secrets.outputs.has_secrets == 'true'
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/my-release-key.jks
+        echo "KEYSTORE_PATH=./app/my-release-key.jks" >> $GITHUB_ENV
+        echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+        echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+        echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+
+    - name: Build APK
+      id: build_apk
+      run: |
+        cd app
+        if [ "${{ steps.check_secrets.outputs.has_secrets }}" = "true" ]; then
+          buildozer -v android release
+        else
+          buildozer -v android debug
+        fi
+
+    - name: Locate the APK
+      run: |
+        echo "APK_DIR=$(find . -name \"*.apk\" -type f | head -1)" >> $GITHUB_ENV
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-apk
+        path: ${{ env.APK_DIR }}
