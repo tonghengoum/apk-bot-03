@@ -1,0 +1,7 @@
+&lt;resources&gt;
+    &lt;color name=&quot;colorPrimary&quot;&gt;#6200EE&lt;/color&gt;
+    &lt;color name=&quot;colorPrimaryDark&quot;&gt;#3700B3&lt;/color&gt;
+    &lt;color name=&quot;colorAccent&quot;&gt;#03DAC5&lt;/color&gt;
+    &lt;color name=&quot;button_background&quot;&gt;#6200EE&lt;/color&gt;
+    &lt;color name=&quot;button_text&quot;&gt;#FFFFFF&lt;/color&gt;
+&lt;/resources&gt;

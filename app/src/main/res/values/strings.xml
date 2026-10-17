@@ -1,0 +1,7 @@
+&lt;resources&gt;
+    &lt;string name=&quot;app_name&quot;&gt;MyApp&lt;/string&gt;
+    &lt;string name=&quot;hello_world&quot;&gt;Hello, World!&lt;/string&gt;
+    &lt;string name=&quot;button_toggle_text&quot;&gt;Toggle Text&lt;/string&gt;
+    &lt;string name=&quot;button_start_service&quot;&gt;Start Service&lt;/string&gt;
+    &lt;string name=&quot;button_stop_service&quot;&gt;Stop Service&lt;/string&gt;
+&lt;/resources&gt;
